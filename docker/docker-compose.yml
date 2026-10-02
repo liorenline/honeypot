@@ -9,7 +9,10 @@ services:
 
   loki:
     image: grafana/loki:3.0.0
-    command: -config.file=/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
     restart: unless-stopped
 
   alloy:
@@ -39,3 +42,4 @@ services:
 
 volumes:
   cowrie-var:
+  loki-data:
