@@ -30,6 +30,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=changeme
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
       - "3000:3000"
     depends_on:
