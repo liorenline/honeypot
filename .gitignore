@@ -1,0 +1,8 @@
+*.tfstate*
+.terraform/
+*.tfvars
+.env
+*.mmdb
+*.pem
+docker/cowrie/var/
+docker/cowrie/dl/
