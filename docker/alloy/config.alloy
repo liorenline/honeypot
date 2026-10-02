@@ -1,0 +1,38 @@
+local.file_match "local_files" {
+  path_targets = [{
+    "__path__" = "/cowrie-var/log/cowrie/cowrie.json",
+    "job"      = "cowrie",
+  }]
+  sync_period = "5s"  
+}
+
+loki.source.file "log_scrape" {
+  targets    = local.file_match.local_files.targets 
+  forward_to = [loki.process.filter_logs.receiver]    
+}
+
+loki.process "filter_logs" {
+  stage.json {
+    expressions = {
+      eventid   = "eventid",
+      timestamp = "timestamp",
+    }
+  }
+  stage.labels {
+    values = {
+      eventid = "",
+    }
+  }
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339Nano"
+  }
+
+  forward_to = [loki.write.grafana_loki.receiver]  
+}
+
+loki.write "grafana_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  }
