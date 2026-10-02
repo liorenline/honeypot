@@ -3,6 +3,6 @@ providers:
   - name: honeypot
     type: file
     disableDeletion: true
-    allowUiUpdates: false
+    allowUiUpdates: true
     options:
       path: /var/lib/grafana/dashboards
