@@ -1,6 +1,6 @@
 services:
   cowrie:
-    image: cowrie/cowrie:latest
+    image: cowrie/cowrie:3.1.0
     ports:
       - "2222:2222"
     volumes:
@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.20.1
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
