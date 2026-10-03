@@ -3,3 +3,4 @@ common_packages:
   - git
   - htop
   - ca-certificates
+  - chrony
