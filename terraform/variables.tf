@@ -3,3 +3,8 @@ variable "region" {
   type        = string
   default     = "eu-central-1"
 }
+
+variable "my_ip" {
+  description = "My IP"
+  type        = string
+}
