@@ -1,0 +1,3 @@
+ssh_port: 22022
+cowrie_port: 2222
+honeypot_dir: /opt/honeypot

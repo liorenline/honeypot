@@ -1,0 +1,28 @@
+- name: Detect SSH port
+  hosts: honeypot
+  gather_facts: false
+  tasks:
+    - name: Check if SSH already listens on the hardened port
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ ssh_port }}"
+        timeout: 5
+      delegate_to: localhost
+      become: false
+      register: ssh_port_check
+      ignore_errors: true
+
+    - name: Use default port 22 on a fresh server
+      ansible.builtin.set_fact:
+        ansible_port: 22
+      when: ssh_port_check is failed
+
+- name: Configure honeypot server
+  hosts: honeypot
+  become: true
+  roles:
+    - common
+    # - ssh_hardening
+    # - firewall
+    # - docker
+    # - honeypot
