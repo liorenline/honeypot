@@ -1,0 +1,117 @@
+name: CI for Honeypot Stack
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker:
+    name: Docker stack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose file
+        run: docker compose -f docker/docker-compose.yml config --quiet
+
+      - name: Validate Grafana Alloy config
+        run: |
+          docker run --rm -v ${{ github.workspace }}/docker/alloy:/etc/alloy \
+            grafana/alloy:v1.20.1 fmt /etc/alloy/config.alloy
+
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+  ansible:
+    name: Ansible lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and ansible-lint
+        run: pip install ansible ansible-lint
+
+      - name: Run ansible-lint
+        run: ansible-lint
+
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive terraform/
+
+      - name: Validate every Terraform directory
+        run: |
+          for dir in $(find terraform -name '*.tf' -exec dirname {} \; | sort -u); do
+            echo "== $dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+          done
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  project-checks:
+    name: Project checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Vault file must be encrypted
+        run: |
+          head -1 ansible/group_vars/all/vault.yml | grep -q '^\$ANSIBLE_VAULT' \
+            || { echo "::error::vault.yml is NOT encrypted"; exit 1; }
+
+      - name: No .env files committed
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "::error::.env file is committed"; exit 1
+          fi
+
+      - name: Grafana dashboards must have "id" null
+        run: |
+          for f in docker/grafana/dashboards/*.json; do
+            jq -e '.id == null' "$f" > /dev/null \
+              || { echo "::error file=$f::top-level \"id\" must be null"; exit 1; }
+          done
