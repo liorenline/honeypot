@@ -1,0 +1,7 @@
+honeypot:
+  hosts:
+    honeypot-aws:
+      ansible_host: 35.158.153.82
+      ansible_user: ubuntu
+      ansible_port: 22022
+      ansible_ssh_private_key_file: ~/.ssh/honeypot
