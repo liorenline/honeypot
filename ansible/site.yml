@@ -22,7 +22,7 @@
   become: true
   roles:
     - common
-    # - ssh_hardening
+    - ssh_hardening
     # - firewall
     # - docker
     # - honeypot

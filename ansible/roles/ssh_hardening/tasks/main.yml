@@ -1,0 +1,40 @@
+- name: Disable SSH socket activation
+  ansible.builtin.systemd:
+    name: ssh.socket
+    enabled: false
+    state: stopped
+  notify: Restart ssh
+
+- name: Enable classic ssh service
+  ansible.builtin.systemd:
+    name: ssh.service
+    enabled: true
+
+- name: Deploy SSH hardening config
+  ansible.builtin.template:
+    src: 00-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart ssh
+
+- name: Ensure privilege separation directory exists
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    mode: "0755"
+
+- name: Validate SSH config
+  ansible.builtin.command: sshd -t
+  changed_when: false
+
+- name: Apply SSH changes now
+  ansible.builtin.meta: flush_handlers
+
+- name: Switch Ansible to the new SSH port
+  ansible.builtin.set_fact:
+    ansible_port: "{{ ssh_port }}"
+
+- name: Reconnect on the new port
+  ansible.builtin.meta: reset_connection
