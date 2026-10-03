@@ -1,6 +1,6 @@
 honeypot:
   hosts:
     honeypot-vm:
-      ansible_host: 192.168.64.5
+      ansible_host: 192.168.64.6
       ansible_user: iva
       ansible_port: 22022
