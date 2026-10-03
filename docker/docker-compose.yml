@@ -2,7 +2,7 @@ services:
   cowrie:
     image: cowrie/cowrie:3.1.0
     ports:
-      - "2222:2222"
+      - "${COWRIE_PUBLIC_PORT:-2222}:2222"
     volumes:
       - cowrie-var:/cowrie/cowrie-git/var
     restart: unless-stopped

@@ -18,9 +18,3 @@ table inet honeypot_filter {
 
 table ip honeypot_nat
 delete table ip honeypot_nat
-table ip honeypot_nat {
-  chain prerouting {
-    type nat hook prerouting priority dstnat; policy accept;
-    tcp dport 22 redirect to :{{ cowrie_port }}
-  }
-}
