@@ -23,6 +23,6 @@
   roles:
     - common
     - ssh_hardening
-    # - firewall
+    - firewall
     # - docker
     # - honeypot

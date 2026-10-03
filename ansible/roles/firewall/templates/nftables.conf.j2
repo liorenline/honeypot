@@ -1,0 +1,26 @@
+#!/usr/sbin/nft -f
+# Managed by Ansible — do not edit by hand
+
+table inet honeypot_filter
+delete table inet honeypot_filter
+table inet honeypot_filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+    # Локальний трафік всередині сервера
+    iif "lo" accept
+    ct state established,related accept
+    meta l4proto { icmp, ipv6-icmp } accept
+    tcp dport {{ ssh_port }} accept
+    tcp dport {{ cowrie_port }} accept
+    limit rate 15/minute log prefix "Dropped by firewall: "
+  }
+}
+
+table ip honeypot_nat
+delete table ip honeypot_nat
+table ip honeypot_nat {
+  chain prerouting {
+    type nat hook prerouting priority dstnat; policy accept;
+    tcp dport 22 redirect to :{{ cowrie_port }}
+  }
+}
