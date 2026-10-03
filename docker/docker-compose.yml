@@ -22,7 +22,7 @@ services:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - cowrie-var:/cowrie-var:ro
     ports:
-      - "12345:12345"
+      - "127.0.0.1:12345:12345"
     depends_on:
       - loki
     restart: unless-stopped
@@ -30,12 +30,12 @@ services:
   grafana:
     image: grafana/grafana:11.0.0
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=changeme
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeme}
+    ports:
+      - "127.0.0.1:3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-    ports:
-      - "3000:3000"
     depends_on:
       - loki
     restart: unless-stopped

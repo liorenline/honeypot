@@ -25,4 +25,4 @@
     - ssh_hardening
     - firewall
     - docker
-    # - honeypot
+    - honeypot

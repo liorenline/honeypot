@@ -1,0 +1,22 @@
+- name: Create honeypot directory
+  ansible.builtin.file:
+    path: "{{ honeypot_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy Docker stack
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../docker/"
+    dest: "{{ honeypot_dir }}/"
+    mode: preserve
+
+- name: Render .env with secrets
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ honeypot_dir }}/.env"
+    mode: "0600"
+
+- name: Start the stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ honeypot_dir }}"
+    state: present
