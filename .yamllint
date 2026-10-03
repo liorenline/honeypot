@@ -2,6 +2,8 @@ extends: default
 
 ignore: |
   ansible/group_vars/all/vault.yml
+  ansible/.ansible/
+  .venv/
 
 rules:
   line-length: disable
